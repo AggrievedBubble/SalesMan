@@ -5,6 +5,16 @@
  */
 package salesmanager;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -117,8 +127,15 @@ public class SalesManager extends javax.swing.JFrame {
 					this.setName("Sales Manager - " + chooser.getSelectedFile().getAbsolutePath());
 					jButton1.setForeground(new java.awt.Color(0, 153, 0));
 					jButton1.setText("CSV Found");
+					try {
+						parseCSV(chooser.getSelectedFile());
+					} catch (FileNotFoundException ex) {
+						Logger.getLogger(SalesManager.class.getName()).log(Level.SEVERE, null, ex);
+					}
 				} else {
-					
+					jButton1.setText("CSV not found");
+					jButton1.setForeground(new java.awt.Color(204, 0, 0));
+					this.setName("Sales Manager");
 				}
 			} else {
 				jButton1.setText("CSV not found");
@@ -166,6 +183,33 @@ public class SalesManager extends javax.swing.JFrame {
 				new SalesManager().setVisible(true);
 			}
 		});
+	}
+	
+	private void parseCSV(File csv_file) throws FileNotFoundException {
+		List<Map<String, String>> parsedList = new ArrayList();
+		Map<String, String> parsedLine = new HashMap();
+		try (Scanner csv_scan = new Scanner(csv_file);){
+			csv_scan.nextLine();
+			while (csv_scan.hasNext()) {
+				String line = csv_scan.nextLine();
+				String[] separated_line = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+
+				parsedLine.put("ID", separated_line[0]);
+				parsedLine.put("Item Name", separated_line[1]);
+				parsedLine.put("Sales Rep", separated_line[2]);
+				parsedLine.put("Sale ID", separated_line[3]);
+				parsedLine.put("Sale price", separated_line[4]);
+				parsedLine.put("Unit Cost", separated_line[5]);
+				parsedLine.put("Sales Area", separated_line[6]);
+				parsedLine.put("Department", separated_line[7]);
+				
+				parsedList.add(parsedLine);
+				
+			}
+			
+			System.out.println(parsedList);
+			
+		}
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
