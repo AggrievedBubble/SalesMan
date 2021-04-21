@@ -8,7 +8,6 @@ package salesmanager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -24,6 +25,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class SalesManager extends javax.swing.JFrame {
 
+	private List<Map<String, String>> parsedList = new ArrayList();
+	
 	/**
 	 * Creates new form MainWindow
 	 */
@@ -47,6 +50,7 @@ public class SalesManager extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Sales Manager");
         setName("Sales Manager"); // NOI18N
         setPreferredSize(new java.awt.Dimension(720, 400));
         getContentPane().setLayout(new java.awt.GridBagLayout());
@@ -64,7 +68,16 @@ public class SalesManager extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(jButton1, gridBagConstraints);
 
-        jTextField1.setText("jTextField1");
+        jTextField1.setForeground(new java.awt.Color(109, 109, 109));
+        jTextField1.setText("Search...");
+        jTextField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jTextField1FocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField1FocusLost(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -84,7 +97,7 @@ public class SalesManager extends javax.swing.JFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
                 false, true, true, false, true, true, true, true
@@ -124,7 +137,7 @@ public class SalesManager extends javax.swing.JFrame {
 		if (return_value == JFileChooser.APPROVE_OPTION) {
 			if (chooser.getSelectedFile().exists()) {
 				if (chooser.getSelectedFile().getName().endsWith(".csv")) {
-					this.setName("Sales Manager - " + chooser.getSelectedFile().getAbsolutePath());
+					this.setTitle("Sales Manager - " + chooser.getSelectedFile().getAbsolutePath());
 					jButton1.setForeground(new java.awt.Color(0, 153, 0));
 					jButton1.setText("CSV Found");
 					try {
@@ -135,19 +148,36 @@ public class SalesManager extends javax.swing.JFrame {
 				} else {
 					jButton1.setText("CSV not found");
 					jButton1.setForeground(new java.awt.Color(204, 0, 0));
-					this.setName("Sales Manager");
+					this.setTitle("Sales Manager");
 				}
 			} else {
 				jButton1.setText("CSV not found");
 				jButton1.setForeground(new java.awt.Color(204, 0, 0));
-				this.setName("Sales Manager");
+				this.setTitle("Sales Manager");
 			}
 		} else {
 			jButton1.setText("CSV not found");
 			jButton1.setForeground(new java.awt.Color(204, 0, 0));
-			this.setName("Sales Manager");
+			this.setTitle("Sales Manager");
 		}
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jTextField1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusGained
+        // TODO add your handling code here:
+		if (jTextField1.getText().equals("Search...")) {
+			jTextField1.setForeground(new java.awt.Color(0, 0, 0));
+			jTextField1.setText("");
+		}
+    }//GEN-LAST:event_jTextField1FocusGained
+
+    private void jTextField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusLost
+        // TODO add your handling code here:
+		if (jTextField1.getText().equals("")) {
+			jTextField1.setForeground(new java.awt.Color(109, 109, 109));
+			jTextField1.setText("Search...");
+		}
+
+    }//GEN-LAST:event_jTextField1FocusLost
 
 	/**
 	 * @param args the command line arguments
@@ -186,11 +216,10 @@ public class SalesManager extends javax.swing.JFrame {
 	}
 	
 	private void parseCSV(File csv_file) throws FileNotFoundException {
-		List<Map<String, String>> parsedList = new ArrayList();
-		Map<String, String> parsedLine = new HashMap();
 		try (Scanner csv_scan = new Scanner(csv_file);){
 			csv_scan.nextLine();
 			while (csv_scan.hasNext()) {
+				Map<String, String> parsedLine = new HashMap();
 				String line = csv_scan.nextLine();
 				String[] separated_line = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
 
@@ -198,7 +227,7 @@ public class SalesManager extends javax.swing.JFrame {
 				parsedLine.put("Item Name", separated_line[1]);
 				parsedLine.put("Sales Rep", separated_line[2]);
 				parsedLine.put("Sale ID", separated_line[3]);
-				parsedLine.put("Sale price", separated_line[4]);
+				parsedLine.put("Sale Price", separated_line[4]);
 				parsedLine.put("Unit Cost", separated_line[5]);
 				parsedLine.put("Sales Area", separated_line[6]);
 				parsedLine.put("Department", separated_line[7]);
@@ -207,8 +236,25 @@ public class SalesManager extends javax.swing.JFrame {
 				
 			}
 			
-			System.out.println(parsedList);
+			updateTable();
 			
+		}
+	}
+	
+	private void updateTable() {
+		DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+		for (Map<String, String> line : parsedList) {
+			Object[] row = {
+				line.get("ID"),
+				line.get("Item Name"),
+				line.get("Sales Rep"), 
+				line.get("Sale ID"),
+				line.get("Sale Price"), 
+				line.get("Unit Cost"), 
+				line.get("Sales Area"),
+				line.get("Department")
+			};
+			model.addRow(row);
 		}
 	}
 
