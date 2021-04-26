@@ -7,6 +7,8 @@ package salesmanager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,6 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 /**
  *
@@ -26,6 +27,7 @@ import javax.swing.table.TableModel;
 public class SalesManager extends javax.swing.JFrame {
 
 	private List<Map<String, String>> parsedList = new ArrayList();
+	static JFileChooser chooser;
 	
 	/**
 	 * Creates new form MainWindow
@@ -48,6 +50,20 @@ public class SalesManager extends javax.swing.JFrame {
         jTextField1 = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JSeparator();
+        jSeparator2 = new javax.swing.JSeparator();
+        MenuBar = new javax.swing.JMenuBar();
+        FileMenu = new javax.swing.JMenu();
+        OpenButton = new javax.swing.JMenuItem();
+        SaveButton = new javax.swing.JMenuItem();
+        SaveAsButton = new javax.swing.JMenuItem();
+        ExitSeparator = new javax.swing.JPopupMenu.Separator();
+        ExitButton = new javax.swing.JMenuItem();
+        EditMenu = new javax.swing.JMenu();
+        NewRecordButton = new javax.swing.JMenuItem();
+        RemoveRecordsButton = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Sales Manager");
@@ -58,9 +74,12 @@ public class SalesManager extends javax.swing.JFrame {
         jButton1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jButton1.setForeground(new java.awt.Color(204, 0, 0));
         jButton1.setText("CSV not found");
+        jButton1.setFocusable(false);
+        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                OpenCSV(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -79,7 +98,7 @@ public class SalesManager extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
@@ -117,7 +136,7 @@ public class SalesManager extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
@@ -125,14 +144,90 @@ public class SalesManager extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
         getContentPane().add(jScrollPane1, gridBagConstraints);
 
+        jButton2.setText("+");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 0);
+        getContentPane().add(jButton2, gridBagConstraints);
+
+        jButton3.setText("-");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
+        getContentPane().add(jButton3, gridBagConstraints);
+
+        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        getContentPane().add(jSeparator1, gridBagConstraints);
+
+        jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        getContentPane().add(jSeparator2, gridBagConstraints);
+
+        FileMenu.setText("File");
+
+        OpenButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        OpenButton.setText("Open...");
+        OpenButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                OpenCSV(evt);
+            }
+        });
+        FileMenu.add(OpenButton);
+
+        SaveButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        SaveButton.setText("Save...");
+        SaveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SaveButtonActionPerformed(evt);
+            }
+        });
+        FileMenu.add(SaveButton);
+
+        SaveAsButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        SaveAsButton.setText("Save As...");
+        FileMenu.add(SaveAsButton);
+        FileMenu.add(ExitSeparator);
+
+        ExitButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_DOWN_MASK));
+        ExitButton.setText("Exit...");
+        FileMenu.add(ExitButton);
+
+        MenuBar.add(FileMenu);
+
+        EditMenu.setText("Edit");
+
+        NewRecordButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_INSERT, 0));
+        NewRecordButton.setText("New Record...");
+        EditMenu.add(NewRecordButton);
+
+        RemoveRecordsButton.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, 0));
+        RemoveRecordsButton.setText("Remove Selected Record(s)...");
+        EditMenu.add(RemoveRecordsButton);
+
+        MenuBar.add(EditMenu);
+
+        setJMenuBar(MenuBar);
+
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void OpenCSV(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OpenCSV
         // TODO add your handling code here:
-		JFileChooser chooser = new JFileChooser();
-		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv) Files", "csv"));
 		int return_value = chooser.showOpenDialog(this);
 		if (return_value == JFileChooser.APPROVE_OPTION) {
 			if (chooser.getSelectedFile().exists()) {
@@ -160,7 +255,7 @@ public class SalesManager extends javax.swing.JFrame {
 			jButton1.setForeground(new java.awt.Color(204, 0, 0));
 			this.setTitle("Sales Manager");
 		}
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_OpenCSV
 
     private void jTextField1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusGained
         // TODO add your handling code here:
@@ -178,6 +273,37 @@ public class SalesManager extends javax.swing.JFrame {
 		}
 
     }//GEN-LAST:event_jTextField1FocusLost
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void SaveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveButtonActionPerformed
+		try {
+			FileWriter writer = new FileWriter(chooser.getSelectedFile().getAbsolutePath(), true);
+			
+			DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+			writer.write("Column1, Item Name, Sales Rep, Sales ID#, Sale Price, Unit Cost, Sales Area, Department\n");
+			for (int i = 0; i != model.getRowCount(); i++) {
+				String row = 
+						"\"" + model.getValueAt(i, 0) + "\", " + //ID
+						"\"" + model.getValueAt(i, 1) + "\", " + //Item Name
+						"\"" + model.getValueAt(i, 2) + "\", " + //Sales Rep
+						"\"" + model.getValueAt(i, 3) + "\", " + //Sales ID
+						"\"" + model.getValueAt(i, 4) + "\", " + //Sale Price
+						"\"" + model.getValueAt(i, 5) + "\", " + //Unit Cost
+						"\"" + model.getValueAt(i, 6) + "\", " + //Sales Area
+						"\"" + model.getValueAt(i, 7) + "\", \n" + //Department
+						
+				writer.write(row);
+						
+			}
+			
+		} catch (IOException ex) {
+			Logger.getLogger(SalesManager.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		
+    }//GEN-LAST:event_SaveButtonActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -207,6 +333,11 @@ public class SalesManager extends javax.swing.JFrame {
 		//</editor-fold>
 		//</editor-fold>
 
+		
+		chooser = new JFileChooser();
+		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv) Files", "csv"));
+		
+		
 		/* Create and display the form */
 		java.awt.EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -237,7 +368,7 @@ public class SalesManager extends javax.swing.JFrame {
 			}
 			
 			updateTable();
-			
+		
 		}
 	}
 	
@@ -259,8 +390,22 @@ public class SalesManager extends javax.swing.JFrame {
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu EditMenu;
+    private javax.swing.JMenuItem ExitButton;
+    private javax.swing.JSeparator ExitSeparator;
+    private javax.swing.JMenu FileMenu;
+    private javax.swing.JMenuBar MenuBar;
+    private javax.swing.JMenuItem NewRecordButton;
+    private javax.swing.JMenuItem OpenButton;
+    private javax.swing.JMenuItem RemoveRecordsButton;
+    private javax.swing.JMenuItem SaveAsButton;
+    private javax.swing.JMenuItem SaveButton;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
