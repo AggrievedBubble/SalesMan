@@ -17,8 +17,13 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.RowFilter;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -27,13 +32,51 @@ import javax.swing.table.DefaultTableModel;
 public class SalesManager extends javax.swing.JFrame {
 
 	private List<Map<String, String>> parsedList = new ArrayList();
-	static JFileChooser chooser;
+	private JFileChooser chooser;
+	private TableRowSorter<TableModel> rowSorter;
 	
 	/**
 	 * Creates new form MainWindow
 	 */
 	public SalesManager() {
 		initComponents();
+		
+		chooser = new JFileChooser();
+		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv) Files", "csv"));
+		rowSorter = new TableRowSorter<>(table.getModel());
+		table.setRowSorter(rowSorter);
+		
+		searchField.getDocument().addDocumentListener(new DocumentListener(){
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                String text = searchField.getText();
+
+                if (text.trim().length() == 0 || text.trim().equals("Search...")) {
+                    rowSorter.setRowFilter(null);
+                } else {
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                String text = searchField.getText();
+
+                if (text.trim().length() == 0 || text.trim().equals("Search...")) {
+                    rowSorter.setRowFilter(null);
+                } else {
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                }
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+        });
+		
 	}
 
 	/**
@@ -46,12 +89,12 @@ public class SalesManager extends javax.swing.JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jButton1 = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        CSVButton = new javax.swing.JButton();
+        searchField = new javax.swing.JTextField();
+        tableScrollPane = new javax.swing.JScrollPane();
+        table = new javax.swing.JTable();
+        addRowButton = new javax.swing.JButton();
+        removeRowButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator2 = new javax.swing.JSeparator();
         MenuBar = new javax.swing.JMenuBar();
@@ -71,13 +114,13 @@ public class SalesManager extends javax.swing.JFrame {
         setPreferredSize(new java.awt.Dimension(720, 400));
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        jButton1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(204, 0, 0));
-        jButton1.setText("CSV not found");
-        jButton1.setFocusable(false);
-        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        CSVButton.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        CSVButton.setForeground(new java.awt.Color(204, 0, 0));
+        CSVButton.setText("CSV not found");
+        CSVButton.setFocusable(false);
+        CSVButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        CSVButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        CSVButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 OpenCSV(evt);
             }
@@ -85,16 +128,16 @@ public class SalesManager extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        getContentPane().add(jButton1, gridBagConstraints);
+        getContentPane().add(CSVButton, gridBagConstraints);
 
-        jTextField1.setForeground(new java.awt.Color(109, 109, 109));
-        jTextField1.setText("Search...");
-        jTextField1.addFocusListener(new java.awt.event.FocusAdapter() {
+        searchField.setForeground(new java.awt.Color(109, 109, 109));
+        searchField.setText("Search...");
+        searchField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                jTextField1FocusGained(evt);
+                searchFieldFocusGained(evt);
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
-                jTextField1FocusLost(evt);
+                searchFieldFocusLost(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -104,10 +147,10 @@ public class SalesManager extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        getContentPane().add(jTextField1, gridBagConstraints);
+        getContentPane().add(searchField, gridBagConstraints);
 
-        jTable1.setAutoCreateRowSorter(true);
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        table.setAutoCreateRowSorter(true);
+        table.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -116,22 +159,15 @@ public class SalesManager extends javax.swing.JFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, true, true, false, true, true, true, true
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Float.class, java.lang.Float.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
             }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
         });
-        jTable1.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(jTable1);
+        table.getTableHeader().setReorderingAllowed(false);
+        tableScrollPane.setViewportView(table);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -142,26 +178,26 @@ public class SalesManager extends javax.swing.JFrame {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
-        getContentPane().add(jScrollPane1, gridBagConstraints);
+        getContentPane().add(tableScrollPane, gridBagConstraints);
 
-        jButton2.setText("+");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        addRowButton.setText("+");
+        addRowButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                addRowButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 0);
-        getContentPane().add(jButton2, gridBagConstraints);
+        getContentPane().add(addRowButton, gridBagConstraints);
 
-        jButton3.setText("-");
+        removeRowButton.setText("-");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
-        getContentPane().add(jButton3, gridBagConstraints);
+        getContentPane().add(removeRowButton, gridBagConstraints);
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -233,56 +269,59 @@ public class SalesManager extends javax.swing.JFrame {
 			if (chooser.getSelectedFile().exists()) {
 				if (chooser.getSelectedFile().getName().endsWith(".csv")) {
 					this.setTitle("Sales Manager - " + chooser.getSelectedFile().getAbsolutePath());
-					jButton1.setForeground(new java.awt.Color(0, 153, 0));
-					jButton1.setText("CSV Found");
+					CSVButton.setForeground(new java.awt.Color(0, 153, 0));
+					CSVButton.setText("CSV Found");
 					try {
 						parseCSV(chooser.getSelectedFile());
 					} catch (FileNotFoundException ex) {
 						Logger.getLogger(SalesManager.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				} else {
-					jButton1.setText("CSV not found");
-					jButton1.setForeground(new java.awt.Color(204, 0, 0));
+					CSVButton.setText("CSV not found");
+					CSVButton.setForeground(new java.awt.Color(204, 0, 0));
 					this.setTitle("Sales Manager");
 				}
 			} else {
-				jButton1.setText("CSV not found");
-				jButton1.setForeground(new java.awt.Color(204, 0, 0));
+				CSVButton.setText("CSV not found");
+				CSVButton.setForeground(new java.awt.Color(204, 0, 0));
 				this.setTitle("Sales Manager");
 			}
 		} else {
-			jButton1.setText("CSV not found");
-			jButton1.setForeground(new java.awt.Color(204, 0, 0));
+			CSVButton.setText("CSV not found");
+			CSVButton.setForeground(new java.awt.Color(204, 0, 0));
 			this.setTitle("Sales Manager");
 		}
     }//GEN-LAST:event_OpenCSV
 
-    private void jTextField1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusGained
+    private void searchFieldFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_searchFieldFocusGained
         // TODO add your handling code here:
-		if (jTextField1.getText().equals("Search...")) {
-			jTextField1.setForeground(new java.awt.Color(0, 0, 0));
-			jTextField1.setText("");
+		if (searchField.getText().equals("Search...")) {
+			searchField.setForeground(new java.awt.Color(0, 0, 0));
+			searchField.setText("");
 		}
-    }//GEN-LAST:event_jTextField1FocusGained
+    }//GEN-LAST:event_searchFieldFocusGained
 
-    private void jTextField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusLost
+    private void searchFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_searchFieldFocusLost
         // TODO add your handling code here:
-		if (jTextField1.getText().equals("")) {
-			jTextField1.setForeground(new java.awt.Color(109, 109, 109));
-			jTextField1.setText("Search...");
+		if (searchField.getText().equals("")) {
+			searchField.setForeground(new java.awt.Color(109, 109, 109));
+			searchField.setText("Search...");
 		}
 
-    }//GEN-LAST:event_jTextField1FocusLost
+    }//GEN-LAST:event_searchFieldFocusLost
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void addRowButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRowButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_addRowButtonActionPerformed
 
     private void SaveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveButtonActionPerformed
 		try {
-			FileWriter writer = new FileWriter(chooser.getSelectedFile().getAbsolutePath(), true);
+			FileWriter writer = new FileWriter(chooser.getSelectedFile().getAbsolutePath());
+			writer.write("");
+			writer.close();
+			writer = new FileWriter(chooser.getSelectedFile().getAbsolutePath(), true);
 			
-			DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+			DefaultTableModel model = (DefaultTableModel) table.getModel();
 			writer.write("Column1, Item Name, Sales Rep, Sales ID#, Sale Price, Unit Cost, Sales Area, Department\n");
 			for (int i = 0; i != model.getRowCount(); i++) {
 				String row = 
@@ -293,7 +332,7 @@ public class SalesManager extends javax.swing.JFrame {
 						"\"" + model.getValueAt(i, 4) + "\", " + //Sale Price
 						"\"" + model.getValueAt(i, 5) + "\", " + //Unit Cost
 						"\"" + model.getValueAt(i, 6) + "\", " + //Sales Area
-						"\"" + model.getValueAt(i, 7) + "\", \n" + //Department
+						"\"" + model.getValueAt(i, 7) + "\", \n"; //Department
 						
 				writer.write(row);
 						
@@ -332,10 +371,7 @@ public class SalesManager extends javax.swing.JFrame {
 		}
 		//</editor-fold>
 		//</editor-fold>
-
-		
-		chooser = new JFileChooser();
-		chooser.setFileFilter(new FileNameExtensionFilter("Comma Separated Values (.csv) Files", "csv"));
+	
 		
 		
 		/* Create and display the form */
@@ -373,15 +409,15 @@ public class SalesManager extends javax.swing.JFrame {
 	}
 	
 	private void updateTable() {
-		DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		for (Map<String, String> line : parsedList) {
 			Object[] row = {
-				line.get("ID"),
+				Integer.parseInt(line.get("ID")),
 				line.get("Item Name"),
 				line.get("Sales Rep"), 
 				line.get("Sale ID"),
-				line.get("Sale Price"), 
-				line.get("Unit Cost"), 
+				Float.parseFloat(line.get("Sale Price")), 
+				Float.parseFloat(line.get("Unit Cost")), 
 				line.get("Sales Area"),
 				line.get("Department")
 			};
@@ -390,9 +426,10 @@ public class SalesManager extends javax.swing.JFrame {
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton CSVButton;
     private javax.swing.JMenu EditMenu;
     private javax.swing.JMenuItem ExitButton;
-    private javax.swing.JSeparator ExitSeparator;
+    private javax.swing.JPopupMenu.Separator ExitSeparator;
     private javax.swing.JMenu FileMenu;
     private javax.swing.JMenuBar MenuBar;
     private javax.swing.JMenuItem NewRecordButton;
@@ -400,13 +437,12 @@ public class SalesManager extends javax.swing.JFrame {
     private javax.swing.JMenuItem RemoveRecordsButton;
     private javax.swing.JMenuItem SaveAsButton;
     private javax.swing.JMenuItem SaveButton;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton addRowButton;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JButton removeRowButton;
+    private javax.swing.JTextField searchField;
+    private javax.swing.JTable table;
+    private javax.swing.JScrollPane tableScrollPane;
     // End of variables declaration//GEN-END:variables
 }
