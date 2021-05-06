@@ -322,17 +322,17 @@ public class SalesManager extends javax.swing.JFrame {
 			writer = new FileWriter(chooser.getSelectedFile().getAbsolutePath(), true);
 			
 			DefaultTableModel model = (DefaultTableModel) table.getModel();
-			writer.write("Column1, Item Name, Sales Rep, Sales ID#, Sale Price, Unit Cost, Sales Area, Department\n");
+			writer.write("Column1, Item Name, Sales Rep, Sale ID#, Sale Price, Unit Cost, Sales Area, Department\n");
 			for (int i = 0; i != model.getRowCount(); i++) {
 				String row = 
-						"\"" + model.getValueAt(i, 0) + "\", " + //ID
-						"\"" + model.getValueAt(i, 1) + "\", " + //Item Name
-						"\"" + model.getValueAt(i, 2) + "\", " + //Sales Rep
-						"\"" + model.getValueAt(i, 3) + "\", " + //Sales ID
-						"\"" + model.getValueAt(i, 4) + "\", " + //Sale Price
-						"\"" + model.getValueAt(i, 5) + "\", " + //Unit Cost
-						"\"" + model.getValueAt(i, 6) + "\", " + //Sales Area
-						"\"" + model.getValueAt(i, 7) + "\", \n"; //Department
+						model.getValueAt(i, 0).toString().replaceAll("[\",]", "") + ", " + //ID
+						model.getValueAt(i, 1).toString().replaceAll("[\",]", "") + ", " + //Item Name
+						model.getValueAt(i, 2).toString().replaceAll("[\",]", "") + ", " + //Sales Rep
+						model.getValueAt(i, 3).toString().replaceAll("[\",]", "") + ", " + //Sale ID
+						model.getValueAt(i, 4).toString().replaceAll("[\",]", "") + ", " + //Sale Price
+						model.getValueAt(i, 5).toString().replaceAll("[\",]", "") + ", " + //Unit Cost
+						model.getValueAt(i, 6).toString().replaceAll("[\",]", "") + ", " + //Sales Area
+						model.getValueAt(i, 7).toString().replaceAll("[\",]", "") + ", \n"; //Department
 						
 				writer.write(row);
 						
@@ -381,7 +381,7 @@ public class SalesManager extends javax.swing.JFrame {
 			}
 		});
 	}
-	
+
 	private void parseCSV(File csv_file) throws FileNotFoundException {
 		try (Scanner csv_scan = new Scanner(csv_file);){
 			csv_scan.nextLine();
@@ -415,7 +415,7 @@ public class SalesManager extends javax.swing.JFrame {
 				Integer.parseInt(line.get("ID")),
 				line.get("Item Name"),
 				line.get("Sales Rep"), 
-				line.get("Sale ID"),
+				Integer.parseInt(line.get("Sale ID")),
 				Float.parseFloat(line.get("Sale Price")), 
 				Float.parseFloat(line.get("Unit Cost")), 
 				line.get("Sales Area"),
